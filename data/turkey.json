@@ -1,0 +1,55 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "İstanbul" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [28.806, 41.056],
+            [29.014, 41.044],
+            [29.066, 40.997],
+            [29.055, 40.935],
+            [28.870, 40.915],
+            [28.806, 41.056]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Ankara" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [32.59, 39.99],
+            [33.01, 39.95],
+            [32.92, 39.73],
+            [32.52, 39.76],
+            [32.59, 39.99]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "İzmir" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [27.15, 38.55],
+            [27.39, 38.55],
+            [27.50, 38.40],
+            [27.21, 38.30],
+            [27.15, 38.55]
+          ]
+        ]
+      }
+    }
+    /* İstersen daha fazla il ekleyebilirsin... */
+  ]
+}

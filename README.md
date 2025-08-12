@@ -1,41 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🇹🇷 Türkiye Haritası Üzerinde Alan Yönetimi
 
-## Getting Started
+Bu proje, **Next.js** ve **React Leaflet** kullanarak Türkiye haritası üzerinde alan seçimi, manuel alan ekleme ve veritabanına kayıt işlemlerini sağlayan bir web uygulamasıdır.  
+Kullanıcılar haritadan belirli bölgeleri (il, ilçe veya özel alan) seçebilir ya da manuel olarak alan ekleyebilir.
 
-First, run the development server:
+## 🚀 Özellikler
 
+- 📍 **Harita Üzerinden Alan Seçimi**
+  - Türkiye haritasında belirli alanlar tıklanarak seçilebilir.
+  - Seçilen alanın adı ve koordinat bilgileri API’ye gönderilir.
+
+- ✏ **Manuel Alan Ekleme**
+  - Harita kullanmadan boş bir alan seçimi yapılabilir.
+  - İstenirse manuel olarak koordinatlar girilebilir.
+
+- 🗄 **Veritabanı Entegrasyonu**
+  - **Prisma ORM** ile **PostgreSQL** üzerinde veri saklama.
+  - Alan bilgileri `/api/alanlar` endpoint’i ile eklenir.
+
+- 💡 **Dinamik Yükleme**
+  - Harita bileşeni SSR kapalı şekilde dinamik olarak yüklenir.
+  - Yükleme sırasında özel loading ekranı gösterilir.
+
+---
+
+## 🛠 Kullanılan Teknolojiler
+
+- [Next.js](https://nextjs.org/) – React tabanlı modern web framework
+- [React Leaflet](https://react-leaflet.js.org/) – Harita görüntüleme
+- [Prisma](https://www.prisma.io/) – ORM ve veritabanı yönetimi
+- [PostgreSQL](https://www.postgresql.org/) – İlişkisel veritabanı
+- [Axios](https://axios-http.com/) – HTTP istekleri
+- [Tailwind CSS](https://tailwindcss.com/) – UI stillendirme
+
+---
+
+## 📂 Proje Yapısı
+
+/app
+/api
+/alanlar -> Alan ekleme API endpoint'i
+page.tsx -> Harita ve manuel alan ekleme sayfası
+/components
+TurkeyMap.tsx -> Harita bileşeni (alan seçimi)
+
+yaml
+Kopyala
+Düzenle
+
+---
+
+## ⚙️ Kurulum
+
+### 1️⃣ Depoyu Klonlayın
 ```bash
+git clone https://github.com/kullaniciadi/proje-adi.git
+cd proje-adi
+2️⃣ Bağımlılıkları Yükleyin
+bash
+Kopyala
+Düzenle
+npm install
+3️⃣ .env Dosyası Oluşturun
+.env içine PostgreSQL bağlantı bilgilerinizi girin:
+
+env
+Kopyala
+Düzenle
+DATABASE_URL="postgresql://kullanici:sifre@localhost:5432/veritabani"
+4️⃣ Prisma Migrasyonunu Çalıştırın
+bash
+Kopyala
+Düzenle
+npx prisma migrate dev --name init
+5️⃣ Geliştirme Sunucusunu Başlatın
+bash
+Kopyala
+Düzenle
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Uygulama şu adreste çalışacaktır:
+http://localhost:3000
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+🖼 Kullanım
+Haritadan Seçim Yapma
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Haritada tıklayarak bir alan seçin.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Seçilen alan adı ve koordinatlar API’ye gönderilir.
 
-## Learn More
+Boş Alan Seçimi
 
-To learn more about Next.js, take a look at the following resources:
+"Boş Alan Seç" butonuna basarak koordinatsız bir alan ekleyin.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Manuel Koordinat Girişi (opsiyonel)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Manuel koordinat girip “Manuel Alan Ekle” butonuna basın.
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# tree-rise
-# tree-rise
-# tree-rise
-Ağaç 
-# tree-rise

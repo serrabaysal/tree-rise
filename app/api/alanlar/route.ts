@@ -1,29 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@/generated/prisma"
+import { PrismaClient } from "@/generated/prisma";
 
 const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
   try {
-
     const body = await req.json();
-    const { name, type, coordinates } = body;
+    let { name, type, coordinates } = body;
 
     if (!name || !type || !coordinates) {
-      return NextResponse.json({ error: 'Tüm alanlar (name, type, coordinates) zorunludur' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Tüm alanlar (name, type, coordinates) zorunludur" },
+        { status: 400 }
+      );
+    }
+
+    if (typeof coordinates === "string") {
+      coordinates = JSON.parse(coordinates);
+    }
+
+    // Manuel mapping
+    const alanTypeMapping: { [key: string]: "YANAN" | "DIKIM_YAPILAN" | "FREE" } = {
+      yanan: "YANAN",
+      dikim_yapilan: "DIKIM_YAPILAN",
+      free: "FREE",
+      serbest: "FREE", // opsiyonel olarak Türkçe "serbest" kelimesini de destekleyebilirsin
+    };
+
+    const lowerType = String(type).toLowerCase();
+
+    const typeEnum = alanTypeMapping[lowerType];
+
+    if (!typeEnum) {
+      return NextResponse.json(
+        {
+          error: `Geçersiz type değeri: ${type}. Beklenen: YANAN, DIKIM_YAPILAN, FREE`,
+        },
+        { status: 400 }
+      );
     }
 
     const yeniAlan = await prisma.alan.create({
       data: {
         name,
-        type,
+        type: typeEnum,
         coordinates,
       },
     });
 
     return NextResponse.json(yeniAlan);
-  } catch (error) {
-    console.error('POST alanlar error:', error);
-    return NextResponse.json({ error: 'Alan eklenemedi' }, { status: 500 });
+  } catch (error: any) {
+    console.error("POST alanlar error:", error.message, error.stack);
+    return NextResponse.json(
+      { error: "Alan eklenemedi", details: error.message },
+      { status: 500 }
+    );
   }
 }
+
+

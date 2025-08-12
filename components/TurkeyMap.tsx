@@ -25,7 +25,6 @@ interface TurkeyMapProps {
   onAddArea: (name: string, type: string, coordinates: string) => void;
 }
 
-// Haritaya tıklayınca noktayı işleyen component
 function MapClickHandler({ onAddArea }: TurkeyMapProps) {
   const [clickedPos, setClickedPos] = useState<LatLngExpression | null>(null);
 
@@ -35,7 +34,8 @@ function MapClickHandler({ onAddArea }: TurkeyMapProps) {
       setClickedPos([lat, lng]);
 
       // Backend'e tıklanan noktanın koordinatlarını gönderiyoruz
-      onAddArea("Seçilen Nokta", "empty-zone", JSON.stringify([[lat, lng]]));
+      // Burada type olarak 'FREE' veriyoruz, backend enumuna uygun olsun diye
+      onAddArea("Seçilen Nokta", "FREE", JSON.stringify([[lat, lng]]));
     },
   });
 
@@ -45,6 +45,7 @@ function MapClickHandler({ onAddArea }: TurkeyMapProps) {
     </Marker>
   ) : null;
 }
+
 
 export default function TurkeyMap({ onAddArea }: TurkeyMapProps) {
   const centerPosition: LatLngExpression = [39.0, 35.0];
@@ -66,9 +67,10 @@ export default function TurkeyMap({ onAddArea }: TurkeyMapProps) {
     { name: "Gaziantep", coordinates: [[37.1, 37.4],[37.05, 37.5],[37.0, 37.4],[37.05, 37.3],[37.1, 37.4]], severity: 2 },
     { name: "Konya", coordinates: [[37.0, 32.5],[36.95, 32.6],[36.9, 32.5],[36.95, 32.4],[37.0, 32.5]], severity: 2 },
     { name: "Kayseri", coordinates: [[38.75, 35.5],[38.7, 35.6],[38.65, 35.5],[38.7, 35.4],[38.75, 35.5]], severity: 1 },
-  ];
+    {name: "Sivas", coordinates: [[38.75, 37.02],[38.70, 37.12],[38.65, 37.02],[38.70, 36.92],[38.75, 37.02]],severity: 1},
+];
 
-  // Yangın bölgesinin polygonunun ortasını bulmak için fonksiyon
+  
   const getCenter = (coords: LatLngExpression[]) => {
     let latSum = 0,
       lngSum = 0;
@@ -149,6 +151,7 @@ export default function TurkeyMap({ onAddArea }: TurkeyMapProps) {
     </div>
   );
 }
+
 
 
 

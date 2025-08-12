@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import axios from "axios";
 import { useCallback } from "react";
 
-// TurkeyMap bileşenini SSR kapalı şekilde dinamik yükle
 const TurkeyMap = dynamic(() => import("../components/TurkeyMap"), {
   ssr: false,
   loading: () => (
@@ -18,15 +17,22 @@ const TurkeyMap = dynamic(() => import("../components/TurkeyMap"), {
 });
 
 const MapPage = () => {
-  // API'ye veri eklemek için kullanılan fonksiyon
+  
   const handleAddArea = useCallback(
     async (name: string, type: string, coordinates: string) => {
       try {
+        // 'type' değerini büyük harfe çevir (örneğin: "FREE", "YANAN", "DIKIM_YAPILAN")
+        const formattedType = type.toUpperCase().replace(" ", "_");
+
+        // coordinates zaten JSON string formatındaysa, backend parse edecektir
+        // ama buradaki hali backend'e uyumlu olsun diye olduğu gibi gönderiyoruz
+
         const res = await axios.post("/api/alanlar", {
           name,
-          type,
+          type: formattedType,
           coordinates,
         });
+
         console.log("Alan başarıyla eklendi:", res.data);
         alert("Alan başarıyla eklendi!");
       } catch (error) {
@@ -41,8 +47,11 @@ const MapPage = () => {
   const handleButtonClick = async () => {
     await handleAddArea(
       "Test Alanı",
-      "Ağaç Dikimi",
-      "[(39.9, 32.8), (40.0, 33.0)]"
+      "FREE",
+      JSON.stringify([
+        [39.9, 32.8],
+        [40.0, 33.0]
+      ])
     );
   };
 
@@ -63,6 +72,7 @@ const MapPage = () => {
 };
 
 export default MapPage;
+
 
 
 

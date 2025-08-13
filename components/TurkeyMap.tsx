@@ -8,17 +8,24 @@ import {
   Marker,
   useMapEvents,
 } from "react-leaflet";
-import type { LatLngExpression } from "leaflet";
+import type { LatLngExpression, LatLngTuple } from "leaflet";
 import L from "leaflet";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "leaflet/dist/leaflet.css";
 
 import treeIconPng from "../public/tree-icon.png";
+import axios from "axios";
 
 interface FireZone {
   name: string;
   coordinates: LatLngExpression[];
   severity?: number;
+}
+
+interface FirePoint {
+  name: string;
+  coordinate: LatLngExpression;
+  severity?: number; // Opsiyonel, varsayılan olarak 1
 }
 
 interface TurkeyMapProps {
@@ -27,7 +34,6 @@ interface TurkeyMapProps {
 
 function MapClickHandler({ onAddArea }: TurkeyMapProps) {
   const [clickedPos, setClickedPos] = useState<LatLngExpression | null>(null);
-
   useMapEvents({
     click(e) {
       const { lat, lng } = e.latlng;
@@ -50,37 +56,74 @@ function MapClickHandler({ onAddArea }: TurkeyMapProps) {
 export default function TurkeyMap({ onAddArea }: TurkeyMapProps) {
   const centerPosition: LatLngExpression = [39.0, 35.0];
 
-  // Mevcut yangın bölgeleri
-  const fireZones: FireZone[] = [
-    { name: "Manisa", coordinates: [[38.6, 27.4],[38.5, 27.5],[38.45, 27.3],[38.55, 27.2],[38.6, 27.4]], severity: 2 },
-    { name: "Bursa", coordinates: [[40.2, 29.0],[40.1, 29.2],[40.05, 29.0],[40.1, 28.8],[40.2, 29.0]], severity: 1 },
-    { name: "Antalya", coordinates: [[36.9, 30.7],[36.85, 30.8],[36.8, 30.6],[36.85, 30.5],[36.9, 30.7]], severity: 3 },
-    { name: "Mersin", coordinates: [[36.8, 34.6],[36.75, 34.7],[36.7, 34.5],[36.75, 34.4],[36.8, 34.6]], severity: 2 },
-    { name: "Muğla", coordinates: [[37.2, 28.3],[37.15, 28.4],[37.1, 28.2],[37.15, 28.1],[37.2, 28.3]], severity: 3 },
-    { name: "Adana", coordinates: [[37.0, 35.3],[36.95, 35.4],[36.9, 35.2],[36.95, 35.1],[37.0, 35.3]], severity: 2 },
-    { name: "Balıkesir", coordinates: [[39.6, 27.9],[39.55, 28.0],[39.5, 27.8],[39.55, 27.7],[39.6, 27.9]], severity: 1 },
-    { name: "Çanakkale", coordinates: [[40.2, 26.4],[40.15, 26.5],[40.1, 26.3],[40.15, 26.2],[40.2, 26.4]], severity: 1 },
-    { name: "İstanbul", coordinates: [[41.1, 29.0],[41.0, 29.1],[40.9, 29.0],[41.0, 28.9],[41.1, 29.0]], severity: 3 },
-    { name: "Ankara", coordinates: [[39.95, 32.85],[39.9, 33.0],[39.85, 32.9],[39.9, 32.8],[39.95, 32.85]], severity: 2 },
-    { name: "Samsun", coordinates: [[41.3, 36.3],[41.25, 36.4],[41.2, 36.3],[41.25, 36.2],[41.3, 36.3]], severity: 1 },
-    { name: "Trabzon", coordinates: [[41.0, 39.7],[40.95, 39.8],[40.9, 39.7],[40.95, 39.6],[41.0, 39.7]], severity: 1 },
-    { name: "Gaziantep", coordinates: [[37.1, 37.4],[37.05, 37.5],[37.0, 37.4],[37.05, 37.3],[37.1, 37.4]], severity: 2 },
-    { name: "Konya", coordinates: [[37.0, 32.5],[36.95, 32.6],[36.9, 32.5],[36.95, 32.4],[37.0, 32.5]], severity: 2 },
-    { name: "Kayseri", coordinates: [[38.75, 35.5],[38.7, 35.6],[38.65, 35.5],[38.7, 35.4],[38.75, 35.5]], severity: 1 },
-    {name: "Sivas", coordinates: [[38.75, 37.02],[38.70, 37.12],[38.65, 37.02],[38.70, 36.92],[38.75, 37.02]],severity: 1},
-];
+  const [firePoints, setFirePoints] = useState<FirePoint[]>([]);
+
+useEffect(() => {
+  const fetchFireZones = async () => {
+    try {
+      const response = await axios.get("/api/alanlar");
+
+      const formattedData: FirePoint[] = response.data.map((zone: any) => {
+        let coord: [number, number] | null = null;
+
+        if (zone.coordinates?.type === "Polygon") {
+          // GeoJSON polygon → ilk noktayı al ve [lat, lng] formatına çevir
+          const firstPoint = zone.coordinates.coordinates[0][0];
+          coord = [firstPoint[1], firstPoint[0]];
+        } else if (Array.isArray(zone.coordinates) && zone.coordinates.length > 0) {
+          // Düz array → zaten lat, lng mi kontrol et
+          coord = [zone.coordinates[0][0], zone.coordinates[0][1]];
+        }
+
+        return {
+          name: zone.name,
+          coordinate: coord!,
+          severity: zone.severity || 1,
+        };
+      });
+
+      setFirePoints(formattedData);
+    } catch (error) {
+      console.error("Yangın bölgeleri yüklenirken hata:", error);
+    }
+  };
+
+  fetchFireZones();
+}, []);
+
+
+//   // Mevcut yangın bölgeleri
+//   const fireZones: FireZone[] = [
+//     { name: "Manisa", coordinates: [[38.6, 27.4],[38.5, 27.5],[38.45, 27.3],[38.55, 27.2],[38.6, 27.4]], severity: 2 },
+//     { name: "Bursa", coordinates: [[40.2, 29.0],[40.1, 29.2],[40.05, 29.0],[40.1, 28.8],[40.2, 29.0]], severity: 1 },
+//     { name: "Antalya", coordinates: [[36.9, 30.7],[36.85, 30.8],[36.8, 30.6],[36.85, 30.5],[36.9, 30.7]], severity: 3 },
+//     { name: "Mersin", coordinates: [[36.8, 34.6],[36.75, 34.7],[36.7, 34.5],[36.75, 34.4],[36.8, 34.6]], severity: 2 },
+//     { name: "Muğla", coordinates: [[37.2, 28.3],[37.15, 28.4],[37.1, 28.2],[37.15, 28.1],[37.2, 28.3]], severity: 3 },
+//     { name: "Adana", coordinates: [[37.0, 35.3],[36.95, 35.4],[36.9, 35.2],[36.95, 35.1],[37.0, 35.3]], severity: 2 },
+//     { name: "Balıkesir", coordinates: [[39.6, 27.9],[39.55, 28.0],[39.5, 27.8],[39.55, 27.7],[39.6, 27.9]], severity: 1 },
+//     { name: "Çanakkale", coordinates: [[40.2, 26.4],[40.15, 26.5],[40.1, 26.3],[40.15, 26.2],[40.2, 26.4]], severity: 1 },
+//     { name: "İstanbul", coordinates: [[41.1, 29.0],[41.0, 29.1],[40.9, 29.0],[41.0, 28.9],[41.1, 29.0]], severity: 3 },
+//     { name: "Ankara", coordinates: [[39.95, 32.85],[39.9, 33.0],[39.85, 32.9],[39.9, 32.8],[39.95, 32.85]], severity: 2 },
+//     { name: "Samsun", coordinates: [[41.3, 36.3],[41.25, 36.4],[41.2, 36.3],[41.25, 36.2],[41.3, 36.3]], severity: 1 },
+//     { name: "Trabzon", coordinates: [[41.0, 39.7],[40.95, 39.8],[40.9, 39.7],[40.95, 39.6],[41.0, 39.7]], severity: 1 },
+//     { name: "Gaziantep", coordinates: [[37.1, 37.4],[37.05, 37.5],[37.0, 37.4],[37.05, 37.3],[37.1, 37.4]], severity: 2 },
+//     { name: "Konya", coordinates: [[37.0, 32.5],[36.95, 32.6],[36.9, 32.5],[36.95, 32.4],[37.0, 32.5]], severity: 2 },
+//     { name: "Kayseri", coordinates: [[38.75, 35.5],[38.7, 35.6],[38.65, 35.5],[38.7, 35.4],[38.75, 35.5]], severity: 1 },
+//     {name: "Sivas", coordinates: [[38.75, 37.02],[38.70, 37.12],[38.65, 37.02],[38.70, 36.92],[38.75, 37.02]],severity: 1},
+// ];
+
 
   
-  const getCenter = (coords: LatLngExpression[]) => {
-    let latSum = 0,
-      lngSum = 0;
-    coords.forEach((c) => {
-      const [lat, lng] = c as [number, number];
-      latSum += lat;
-      lngSum += lng;
-    });
-    return [latSum / coords.length, lngSum / coords.length] as [number, number];
-  };
+  // const getCenter = (coords: LatLngExpression[]) => {
+  //   let latSum = 0,
+  //     lngSum = 0;
+  //   coords.forEach((c) => {
+  //     const [lat, lng] = c as [number, number];
+  //     latSum += lat;
+  //     lngSum += lng;
+  //   });
+  //   return [latSum / coords.length, lngSum / coords.length] as [number, number];
+  // };
 
   // Ağaç simgesi için ikon ayarı
   const treeIcon = new L.Icon({
@@ -90,18 +133,18 @@ export default function TurkeyMap({ onAddArea }: TurkeyMapProps) {
     popupAnchor: [0, -32],
   });
 
-  // Yangın bölgelerini renklerine göre ayarla
-  const getFillColor = (severity = 1) => {
-    switch (severity) {
-      case 3:
-        return "darkred";
-      case 2:
-        return "orange";
-      case 1:
-      default:
-        return "yellow";
-    }
-  };
+  // // Yangın bölgelerini renklerine göre ayarla
+  // const getFillColor = (severity = 1) => {
+  //   switch (severity) {
+  //     case 3:
+  //       return "darkred";
+  //     case 2:
+  //       return "orange";
+  //     case 1:
+  //     default:
+  //       return "yellow";
+  //   }
+  // };
 
   return (
     <div className="h-[600px] w-full">
@@ -120,7 +163,8 @@ export default function TurkeyMap({ onAddArea }: TurkeyMapProps) {
         <MapClickHandler onAddArea={onAddArea} />
 
         {/* Mevcut yangın bölgeleri poligonları ve işaretçileri */}
-        {fireZones.map((zone, index) => (
+       {/* Mevcut yangın bölgeleri poligonları ve işaretçileri */}
+        {/* {fireZones.map((zone, index) => (
           <div key={index}>
             <Polygon
               key={`poly-${index}`}
@@ -146,17 +190,22 @@ export default function TurkeyMap({ onAddArea }: TurkeyMapProps) {
               }}
             />
           </div>
+        ))} */}
+
+        {firePoints.map((point, index) => (
+          <Marker
+            key={`fire-point-${index}`}
+            position={point.coordinate as LatLngTuple}
+            icon={treeIcon}
+            eventHandlers={{
+              click: () =>
+                onAddArea(point.name, "fire-point", JSON.stringify(point.coordinate)),
+            }}
+          >
+            <Tooltip>{point.name} - Yangın Noktası</Tooltip>
+          </Marker>
         ))}
       </MapContainer>
     </div>
   );
 }
-
-
-
-
-
-
-
-
-

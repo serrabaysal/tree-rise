@@ -3,6 +3,19 @@ import { PrismaClient } from "@/generated/prisma";
 
 const prisma = new PrismaClient();
 
+export async function GET(req: NextRequest) { 
+  try {
+    const alanlar = await prisma.alan.findMany();
+    return NextResponse.json(alanlar);
+  } catch (error: any) {
+    console.error("GET alanlar error:", error.message, error.stack);
+    return NextResponse.json(
+      { error: "Alanlar alınamadı", details: error.message },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();

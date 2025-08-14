@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     let { name, type, coordinates } = body;
-
+ console.log("POST alanlar body:", body);
     if (!name || !type || !coordinates) {
       return NextResponse.json(
         { error: "Tüm alanlar (name, type, coordinates) zorunludur" },

@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(yeniAlan);
+    return NextResponse.json(yeniAlan, { status: 201 });
   } catch (error: any) {
     console.error("POST alanlar error:", error.message, error.stack);
     return NextResponse.json(

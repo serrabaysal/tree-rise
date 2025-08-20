@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FaEnvelope, FaLock, FaSignInAlt } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { useUser } from '@/context/UserContext';
+import axios from 'axios';
 
 export default function LoginPage() {
   const { user, login } = useUser();
@@ -21,29 +22,26 @@ export default function LoginPage() {
     setIsLoading(true);
     setError('');
 
-    try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include',
+  
+      await axios.post('/api/login', {
+        email,
+        password,
+      }).then((response) => {
+        if (response.status === 200) {
+          console.log("Login successful:", response.data);
+          login(response.data.user); // Update user context
+          router.push('/map'); // Redirect to the map page on successful login
+        } else {
+          setError(response.data.message || 'Giriş başarısız!');
+        }
+      })
+      .catch((error) => {
+        setError(error.response.data.message || 'Giriş başarısız!');
+      })
+      .finally(() => {  
+        setIsLoading(false);
       });
-
-      setIsLoading(false);
-
-      if (res.ok) {
-        const data = await res.json(); // { user, token }
-        login(data.user); // UserContext'e kaydet
-        localStorage.setItem('token', data.token); // Token sakla
-        router.push('/map');
-      } else {
-        const data = await res.json().catch(() => ({ message: 'Giriş başarısız! Sunucuda bir hata oluştu.' }));
-        setError(data.message || 'Giriş başarısız!');
-      }
-    } catch (err) {
-      setIsLoading(false);
-      setError('Sunucu hatası!');
-    }
+    
   };
 
   return (

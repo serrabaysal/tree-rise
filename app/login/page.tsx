@@ -4,8 +4,10 @@ import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaEnvelope, FaLock, FaSignInAlt } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import { useUser } from '@/context/UserContext';
 
 export default function LoginPage() {
+  const { user, login } = useUser();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,26 +21,33 @@ export default function LoginPage() {
     setIsLoading(true);
     setError('');
 
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-      credentials: 'include',
-    });
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include',
+      });
 
-    setIsLoading(false);
+      setIsLoading(false);
 
-    if (res.ok) {
-      router.push('/map');
-    } else {
-      const data = await res.json().catch(() => ({ message: 'Giriş başarısız! Sunucuda bir hata oluştu.' }));
-      setError(data.message || 'Giriş başarısız!');
+      if (res.ok) {
+        const data = await res.json(); // { user, token }
+        login(data.user); // UserContext'e kaydet
+        localStorage.setItem('token', data.token); // Token sakla
+        router.push('/map');
+      } else {
+        const data = await res.json().catch(() => ({ message: 'Giriş başarısız! Sunucuda bir hata oluştu.' }));
+        setError(data.message || 'Giriş başarısız!');
+      }
+    } catch (err) {
+      setIsLoading(false);
+      setError('Sunucu hatası!');
     }
   };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center">
-      {/* Arka plan fotoğrafı */}
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{
@@ -47,10 +56,8 @@ export default function LoginPage() {
         }}
       ></div>
 
-      {/* Yeşil yarı saydam overlay */}
       <div className="absolute inset-0 bg-green-900 bg-opacity-60"></div>
 
-      {/* Login kutusu */}
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -59,7 +66,9 @@ export default function LoginPage() {
       >
         <div className="flex flex-col items-center mb-6">
           <FaSignInAlt className="text-green-600 text-5xl mb-2" />
-          <h1 className="text-3xl font-bold text-gray-800">Hoş Geldiniz</h1>
+          <h1 className="text-3xl font-bold text-gray-800 text-center">
+            {user ? `Hoş Geldiniz, ${user.name}` : "Hoş Geldiniz"}
+          </h1>
           <p className="text-gray-500 text-center">
             Haritaya erişmek için giriş yapın
           </p>
@@ -120,3 +129,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+

@@ -27,6 +27,8 @@ export default function LoginPage() {
         email,
         password,
       }).then((response) => {
+        console.log("Login response:", response);
+         return;
         if (response.status === 200) {
           console.log("Login successful:", response.data);
           login(response.data.user); // Update user context

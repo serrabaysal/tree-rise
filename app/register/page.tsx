@@ -35,7 +35,7 @@ export default function RegisterPage() {
       });
 
       if (response.status === 200) {
-        // backend token dönerse login çağırıyoruz
+        
         login(response.data.token);
         router.push('/map');
       } else {

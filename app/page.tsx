@@ -9,42 +9,45 @@ export default function HomePage() {
 
   return (
     <div
-      className="flex items-center justify-center h-screen bg-green-50 bg-cover bg-center relative"
+      className="flex items-center justify-center h-screen bg-green-50 bg-cover bg-center relative overflow-hidden"
       style={{
         backgroundImage:
-          "url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1950&q=80')", // Ağaçlı arka plan
+          "url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1950&q=80')",
       }}
     >
-      {/* Yeşil overlay */}
-      <div className="absolute inset-0 bg-green-900 bg-opacity-40"></div>
+      <div className="absolute inset-0 bg-green-900 bg-opacity-50 backdrop-blur-sm"></div>
 
       <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="relative z-10 bg-white bg-opacity-90 shadow-2xl rounded-2xl p-10 text-center max-w-md w-full"
+        className="relative z-10 bg-white bg-opacity-90 shadow-2xl rounded-3xl p-12 text-center max-w-lg w-full"
       >
-        <h1 className="text-3xl font-bold text-green-800 mb-6">
-          Hoş Geldiniz 
+        <h1 className="text-4xl font-extrabold text-green-800 mb-4 flex justify-center items-center gap-2">
+          🌿 Hoş Geldiniz
         </h1>
-        <p className="text-green-700 mb-8">
+        <p className="text-green-700 mb-8 text-lg">
           Haritaya erişmek için giriş yapın veya yeni bir hesap oluşturun.
         </p>
 
-        <div className="flex flex-col gap-4">
-          <button
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => router.push("/login")}
-            className="flex items-center justify-center gap-2 bg-green-600 text-white px-5 py-3 rounded-xl hover:bg-green-700 transition shadow-md"
+            className="flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 shadow-lg transition-all font-semibold"
           >
             <FaSignInAlt /> Giriş Yap
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => router.push("/register")}
-            className="flex items-center justify-center gap-2 bg-green-400 text-white px-5 py-3 rounded-xl hover:bg-green-500 transition shadow-md"
+            className="flex items-center justify-center gap-2 bg-green-400 text-white px-6 py-3 rounded-xl hover:bg-green-500 shadow-lg transition-all font-semibold"
           >
             <FaUserPlus /> Kayıt Ol
-          </button>
+          </motion.button>
         </div>
       </motion.div>
     </div>

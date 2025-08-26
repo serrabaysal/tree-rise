@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   const UNAUTH_PATHS = ["/login", "/register"];
-  const AUTH_PATHS = ["/map"];
+  const AUTH_PATHS = ["/map", "/etkinlikler"];
   
   const path = request.nextUrl.pathname;
   
